@@ -1,5 +1,14 @@
 import { CustomerModel } from "../models/customerModel.js";
 
+// ponytail: inline guard — hanya dua aturan, tidak perlu library validasi
+function validateCustomerInput({ email, phone }) {
+  if (email && !email.includes("@"))
+    return "Email harus mengandung karakter @.";
+  if (phone && phone.length < 10)
+    return "Nomor telepon minimal 10 karakter.";
+  return null;
+}
+
 export const CustomerController = {
   async getAll(req, res) {
     try {
@@ -31,6 +40,10 @@ export const CustomerController = {
   },
 
   async create(req, res) {
+    const validationError = validateCustomerInput(req.body);
+    if (validationError)
+      return res.status(400).json({ success: false, message: validationError, data: null });
+
     try {
       const data = await CustomerModel.create(req.body);
       res.status(201).json({ success: true, message: "Pelanggan berhasil dibuat.", data });
@@ -40,6 +53,10 @@ export const CustomerController = {
   },
 
   async update(req, res) {
+    const validationError = validateCustomerInput(req.body);
+    if (validationError)
+      return res.status(400).json({ success: false, message: validationError, data: null });
+
     try {
       const data = await CustomerModel.update(req.params.id, req.body);
       res.json({ success: true, message: "Pelanggan berhasil diperbarui.", data });
