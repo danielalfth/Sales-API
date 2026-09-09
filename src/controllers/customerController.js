@@ -3,8 +3,19 @@ import { CustomerModel } from "../models/customerModel.js";
 export const CustomerController = {
   async getAll(req, res) {
     try {
-      const data = await CustomerModel.getAll();
-      res.json({ success: true, message: "Daftar pelanggan berhasil diambil.", data });
+      const { name, page = 1, limit = 10 } = req.query;
+      const result = await CustomerModel.getAll(name, Number(page), Number(limit));
+      res.json({
+        success: true,
+        message: "Daftar pelanggan berhasil diambil.",
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          total_pages: Math.ceil(result.total / result.limit),
+        },
+      });
     } catch (err) {
       res.status(500).json({ success: false, message: err.message, data: null });
     }
